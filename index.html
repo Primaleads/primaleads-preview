@@ -12,11 +12,46 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+<style>
+
+body{
+font-family: Arial;
+padding:20px;
+}
+
+#map{
+height:400px;
+margin-bottom:20px;
+}
+
+button{
+margin:5px;
+padding:10px;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div id="wurzel"></div>
+<h1>PrimaLeads Route</h1>
+
+<button onclick="startRoute()">Route starten</button>
+
+<div id="map"></div>
+
+<h2>Haus erfassen</h2>
+
+<input id="street" placeholder="Straße"><br><br>
+<input id="number" placeholder="Hausnummer"><br><br>
+
+Status:<br><br>
+
+<button onclick="saveLead('PV Interesse')">PV Interesse</button>
+<button onclick="saveLead('WP Interesse')">WP Interesse</button>
+<button onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+<button onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
 
 <script src="index.js"></script>
 
