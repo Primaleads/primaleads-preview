@@ -1,15 +1,5 @@
-
-import React from "react";
-import ReactDOM from "react-dom/client";
-
-const App = () => {
-    return (
-        <div style={{ textAlign: "center", marginTop: "50px" }}>
-            <h1>Welcome to Primaleads Preview</h1>
-            <p>This is your staging environment.</p>
-        </div>
-    );
-};
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+document.getElementById("root").innerHTML = `
+<h1>PrimaLeads App</h1>
+<p>Deine App läuft jetzt online.</p>
+<p>Der nächste Schritt ist das CRM-System aufzubauen.</p>
+`;
