@@ -1,70 +1,56 @@
-document.getElementById("root").innerHTML = `
-
-<div style="font-family:Arial;padding:20px">
-
+document.getElementById("wurzel").innerHTML = `
 <h1>PrimaLeads Route</h1>
 
-<button onclick="startRoute()" style="padding:10px;margin-top:20px">
-Route starten
-</button>
+<button onclick="startRoute()">Route starten</button>
 
-<div id="location" style="margin-top:20px"></div>
+<div id="map" style="height:500px;margin-top:20px;"></div>
 
-<div id="content" style="margin-top:40px"></div>
+<h2>Haus erfassen</h2>
 
-</div>
+<input id="street" placeholder="Straße"><br><br>
+<input id="number" placeholder="Hausnummer"><br><br>
+
+<p>Status:</p>
+
+<button onclick="saveLead('PV Interesse')">PV Interesse</button>
+<button onclick="saveLead('WP Interesse')">WP Interesse</button>
+<button onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+<button onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
 `;
+
+let map;
+let marker;
 
 function startRoute(){
 
-navigator.geolocation.getCurrentPosition(function(position){
+navigator.geolocation.getCurrentPosition(function(pos){
 
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
+const lat = pos.coords.latitude;
+const lng = pos.coords.longitude;
 
-document.getElementById("location").innerHTML = `
-<p><b>Standort erkannt</b></p>
-<p>Breitengrad: ${lat}</p>
-<p>Längengrad: ${lon}</p>
-`;
+map = L.map('map').setView([lat, lng], 17);
 
-showHouseForm();
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
+
+marker = L.marker([lat,lng]).addTo(map)
+.bindPopup("Du bist hier")
+.openPopup();
 
 });
 
 }
 
-function showHouseForm(){
+function saveLead(status){
 
-document.getElementById("content").innerHTML = `
+const street = document.getElementById("street").value;
+const number = document.getElementById("number").value;
 
-<h2>Haus erfassen</h2>
-
-<input placeholder="Straße" style="display:block;margin:10px 0;padding:8px"/>
-<input placeholder="Hausnummer" style="display:block;margin:10px 0;padding:8px"/>
-
-<p>Status:</p>
-
-<button onclick="showLead()">PV Interesse</button>
-<button onclick="showLead()">WP Interesse</button>
-<button>Kein Interesse</button>
-<button>Niemand zuhause</button>
-
-`;
-
-}
-
-function showLead(){
-
-document.getElementById("content").innerHTML = `
-
-<h2>Lead erfassen</h2>
-
-<input placeholder="Name" style="display:block;margin:10px 0;padding:8px"/>
-<input placeholder="Telefon" style="display:block;margin:10px 0;padding:8px"/>
-
-<button style="margin-top:10px">Lead speichern</button>
-
-`;
+alert(
+"Lead gespeichert:\n"+
+street+" "+number+"\n"+
+status
+);
 
 }
