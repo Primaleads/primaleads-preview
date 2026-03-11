@@ -8,12 +8,33 @@ document.getElementById("root").innerHTML = `
 Route starten
 </button>
 
+<div id="location" style="margin-top:20px"></div>
+
 <div id="content" style="margin-top:40px"></div>
 
 </div>
 `;
 
 function startRoute(){
+
+navigator.geolocation.getCurrentPosition(function(position){
+
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
+
+document.getElementById("location").innerHTML = `
+<p><b>Standort erkannt</b></p>
+<p>Breitengrad: ${lat}</p>
+<p>Längengrad: ${lon}</p>
+`;
+
+showHouseForm();
+
+});
+
+}
+
+function showHouseForm(){
 
 document.getElementById("content").innerHTML = `
 
