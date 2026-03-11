@@ -12,29 +12,31 @@ document.getElementById("wurzel").innerHTML = `
 
 <p>Status:</p>
 
-<button onclick="saveLead('PV Interesse')">PV Interesse</button>
-<button onclick="saveLead('WP Interesse')">WP Interesse</button>
-<button onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-<button onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+<button onclick="saveLead('pv')">PV Interesse</button>
+<button onclick="saveLead('wp')">WP Interesse</button>
+<button onclick="saveLead('kein')">Kein Interesse</button>
+<button onclick="saveLead('niemand')">Niemand zuhause</button>
 `;
 
 let map;
-let marker;
+let userLat;
+let userLng;
 
 function startRoute(){
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
-const lat = pos.coords.latitude;
-const lng = pos.coords.longitude;
+userLat = pos.coords.latitude;
+userLng = pos.coords.longitude;
 
-map = L.map('map').setView([lat, lng], 17);
+map = L.map('map').setView([userLat, userLng], 17);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-marker = L.marker([lat,lng]).addTo(map)
+L.marker([userLat,userLng])
+.addTo(map)
 .bindPopup("Du bist hier")
 .openPopup();
 
@@ -47,10 +49,22 @@ function saveLead(status){
 const street = document.getElementById("street").value;
 const number = document.getElementById("number").value;
 
-alert(
-"Lead gespeichert:\n"+
-street+" "+number+"\n"+
-status
+let color;
+
+if(status==="pv") color="green";
+if(status==="wp") color="blue";
+if(status==="kein") color="red";
+if(status==="niemand") color="orange";
+
+const icon = L.circleMarker([userLat,userLng],{
+radius:10,
+color:color,
+fillColor:color,
+fillOpacity:0.8
+}).addTo(map);
+
+icon.bindPopup(
+street+" "+number+"<br>Status: "+status
 );
 
 }
