@@ -1,57 +1,49 @@
 document.getElementById("root").innerHTML = `
+
 <div style="font-family:Arial;padding:20px">
 
-<h1>PrimaLeads Dashboard</h1>
+<h1>PrimaLeads Route</h1>
 
-<div style="margin-top:30px">
-
-<button onclick="showPage('dashboard')" style="margin:5px">Dashboard</button>
-<button onclick="showPage('lead')" style="margin:5px">Neuer Lead</button>
-<button onclick="showPage('leads')" style="margin:5px">Meine Leads</button>
-<button onclick="showPage('route')" style="margin:5px">Laufroute</button>
-
-</div>
+<button onclick="startRoute()" style="padding:10px;margin-top:20px">
+Route starten
+</button>
 
 <div id="content" style="margin-top:40px"></div>
 
 </div>
 `;
 
-function showPage(page){
+function startRoute(){
 
-let content = document.getElementById("content");
+document.getElementById("content").innerHTML = `
 
-if(page === "dashboard"){
-content.innerHTML = `
-<h2>Dashboard</h2>
-<p>Willkommen im PrimaLeads System.</p>
+<h2>Haus erfassen</h2>
+
+<input placeholder="Straße" style="display:block;margin:10px 0;padding:8px"/>
+<input placeholder="Hausnummer" style="display:block;margin:10px 0;padding:8px"/>
+
+<p>Status:</p>
+
+<button onclick="showLead()">PV Interesse</button>
+<button onclick="showLead()">WP Interesse</button>
+<button>Kein Interesse</button>
+<button>Niemand zuhause</button>
+
 `;
+
 }
 
-if(page === "lead"){
-content.innerHTML = `
-<h2>Neuer Lead</h2>
+function showLead(){
+
+document.getElementById("content").innerHTML = `
+
+<h2>Lead erfassen</h2>
 
 <input placeholder="Name" style="display:block;margin:10px 0;padding:8px"/>
 <input placeholder="Telefon" style="display:block;margin:10px 0;padding:8px"/>
-<input placeholder="Adresse" style="display:block;margin:10px 0;padding:8px"/>
 
-<button>Lead speichern</button>
-`;
-}
+<button style="margin-top:10px">Lead speichern</button>
 
-if(page === "leads"){
-content.innerHTML = `
-<h2>Meine Leads</h2>
-<p>Hier erscheinen später alle Leads.</p>
 `;
-}
-
-if(page === "route"){
-content.innerHTML = `
-<h2>Laufroute</h2>
-<p>Hier wird später deine Door-to-Door Route angezeigt.</p>
-`;
-}
 
 }
