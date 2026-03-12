@@ -3,9 +3,9 @@ const supabaseKey = "sb_publishable_q3gMEue0WevkMEEwGzGv-w_jE9eFdNr"
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
 
+let map
 let userLat
 let userLng
-let map
 
 
 
@@ -22,37 +22,56 @@ password: password
 })
 
 if(error){
+
 alert("Login fehlgeschlagen")
 console.log(error)
+
 }else{
+
 document.getElementById("login").style.display = "none"
-}
 
 }
 
+}
 
 
-// MARKER
+
+
+// MARKER FARBE
+
+function getMarkerColor(status){
+
+if(status === "PV Interesse") return "green"
+if(status === "WP Interesse") return "blue"
+if(status === "Kein Interesse") return "red"
+if(status === "Niemand zuhause") return "gray"
+
+return "black"
+
+}
+
+
+
+
+// MARKER SETZEN
 
 function addLeadMarker(lat,lng,street,number,status){
 
-let color = "blue"
-
-if(status === "PV Interesse") color = "green"
-if(status === "WP Interesse") color = "blue"
-if(status === "Kein Interesse") color = "red"
-if(status === "Niemand zuhause") color = "gray"
+const color = getMarkerColor(status)
 
 L.circleMarker([lat,lng],{
+
 radius:10,
 color:color,
 fillColor:color,
 fillOpacity:0.8
+
 })
 .addTo(map)
 .bindPopup(street + " " + number + "<br>" + status)
 
 }
+
 
 
 
@@ -65,8 +84,10 @@ const { data, error } = await supabaseClient
 .select("*")
 
 if(error){
+
 console.log(error)
 return
+
 }
 
 data.forEach(lead => {
@@ -82,6 +103,7 @@ lead.status
 })
 
 }
+
 
 
 
@@ -105,19 +127,19 @@ L.marker([nextLat,nextLng])
 
 
 
+
 // MAP START
 
 function startRoute(){
 
-map = L.map('map').setView([48.62,9.05],16)
+map = L.map("map").setView([48.62,9.05],16)
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
 maxZoom:19
 }).addTo(map)
 
 
-
-// HAUS ANKLICKEN
+// HAUS KLICK
 
 map.on("click", async function(e){
 
@@ -144,7 +166,7 @@ document.getElementById("number").value = data.address.house_number || ""
 
 
 
-// GPS
+// GPS POSITION
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -168,6 +190,7 @@ showNextHouse()
 
 
 
+
 // LEAD SPEICHERN
 
 async function saveLead(status){
@@ -176,8 +199,7 @@ const street = document.getElementById("street").value
 const number = document.getElementById("number").value
 
 
-
-// PRÜFEN OB HAUS EXISTIERT
+// DOPPELTE HÄUSER VERMEIDEN
 
 const { data: existingLead } = await supabaseClient
 .from("Leads")
@@ -188,7 +210,6 @@ const { data: existingLead } = await supabaseClient
 if(existingLead && existingLead.length > 0){
 
 alert("Haus bereits erfasst")
-
 return
 
 }
