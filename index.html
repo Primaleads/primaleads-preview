@@ -12,44 +12,44 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+<style>
+
+body{
+  font-family: Arial;
+  padding:20px;
+}
+
+#login{
+  margin-bottom:30px;
+}
+
+#map{
+  height:400px;
+  margin-bottom:20px;
+}
+
+button{
+  margin:5px;
+  padding:10px;
+}
 
 </style>
+
 </head>
+
 <body>
 
 <div id="login">
 
 <h1>PRIMALEADS</h1>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Passwort">
+<input id="email" placeholder="Email"><br><br>
+
+<input id="password" type="password" placeholder="Passwort"><br><br>
 
 <button onclick="login()">Login</button>
 
 </div>
-
-<style>
-
-body{
-font-family: Arial;
-padding:20px;
-}
-
-#map{
-height:400px;
-margin-bottom:20px;
-}
-
-button{
-margin:5px;
-padding:10px;
-}
-
-</style>
-
-</head>
-
-<body>
 
 <h1>PrimaLeads Route</h1>
 
@@ -60,13 +60,17 @@ padding:10px;
 <h2>Haus erfassen</h2>
 
 <input id="street" placeholder="Straße"><br><br>
+
 <input id="number" placeholder="Hausnummer"><br><br>
 
 Status:<br><br>
 
 <button onclick="saveLead('PV Interesse')">PV Interesse</button>
+
 <button onclick="saveLead('WP Interesse')">WP Interesse</button>
+
 <button onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+
 <button onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
 
 <script src="index.js"></script>
