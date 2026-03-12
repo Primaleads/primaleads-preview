@@ -16,7 +16,7 @@ async function login(){
 const email = document.getElementById("email").value
 const password = document.getElementById("password").value
 
-const { data, error } = await supabaseClient.auth.signInWithPassword({
+const { error } = await supabaseClient.auth.signInWithPassword({
 email: email,
 password: password
 })
@@ -32,8 +32,7 @@ document.getElementById("login").style.display = "none"
 
 
 
-
-// MARKER FARBE
+// MARKER
 
 function addLeadMarker(lat,lng,street,number,status){
 
@@ -54,7 +53,6 @@ fillOpacity:0.8
 .bindPopup(street + " " + number + "<br>" + status)
 
 }
-
 
 
 
@@ -87,6 +85,25 @@ lead.status
 
 
 
+// ROUTE MARKER
+
+function showNextHouse(){
+
+if(!userLat || !userLng) return
+
+const step = 0.0001
+
+const nextLat = userLat + step
+const nextLng = userLng
+
+L.marker([nextLat,nextLng])
+.addTo(map)
+.bindPopup("Nächstes Haus")
+.openPopup()
+
+}
+
+
 
 // MAP START
 
@@ -100,7 +117,7 @@ maxZoom:19
 
 
 
-// Haus anklicken → Adresse erkennen
+// HAUS ANKLICKEN
 
 map.on("click", async function(e){
 
@@ -127,7 +144,7 @@ document.getElementById("number").value = data.address.house_number || ""
 
 
 
-// GPS Position
+// GPS
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -143,10 +160,11 @@ L.marker([userLat,userLng])
 
 loadLeads()
 
+showNextHouse()
+
 })
 
 }
-
 
 
 
@@ -157,7 +175,29 @@ async function saveLead(status){
 const street = document.getElementById("street").value
 const number = document.getElementById("number").value
 
-const { data, error } = await supabaseClient
+
+
+// PRÜFEN OB HAUS EXISTIERT
+
+const { data: existingLead } = await supabaseClient
+.from("Leads")
+.select("*")
+.eq("street", street)
+.eq("number", number)
+
+if(existingLead && existingLead.length > 0){
+
+alert("Haus bereits erfasst")
+
+return
+
+}
+
+
+
+// SPEICHERN
+
+const { error } = await supabaseClient
 .from("Leads")
 .insert([
 {
@@ -170,8 +210,10 @@ lng: userLng
 ])
 
 if(error){
+
 console.log(error)
 alert("Fehler beim Speichern")
+
 }else{
 
 addLeadMarker(userLat,userLng,street,number,status)
