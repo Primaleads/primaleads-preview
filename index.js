@@ -7,6 +7,8 @@ let map
 let userLat
 let userLng
 
+let visitedHouses = {}
+
 function startRoute(){
 
 map = L.map('map').setView([48.62,9.05],16)
@@ -36,8 +38,6 @@ map.on("click", async function(e){
 userLat = e.latlng.lat
 userLng = e.latlng.lng
 
-L.marker([userLat,userLng]).addTo(map)
-
 const url =
 "https://nominatim.openstreetmap.org/reverse?format=json&lat="
 +userLat+
@@ -49,11 +49,23 @@ const data = await response.json()
 
 if(data.address){
 
-document.getElementById("street").value =
-data.address.road || ""
+const street = data.address.road || ""
+const number = data.address.house_number || ""
 
-document.getElementById("number").value =
-data.address.house_number || ""
+document.getElementById("street").value = street
+document.getElementById("number").value = number
+
+const key = street + number
+
+if(visitedHouses[key]){
+
+L.circleMarker([userLat,userLng],{
+radius:10,
+color:"black",
+fillOpacity:0.2
+}).addTo(map)
+
+}
 
 }
 
@@ -67,6 +79,10 @@ async function saveLead(status){
 
 const street = document.getElementById("street").value
 const number = document.getElementById("number").value
+
+const key = street + number
+
+visitedHouses[key] = true
 
 const { error } = await supabaseClient
 .from("Leads")
@@ -86,8 +102,6 @@ alert("Fehler beim Speichern")
 console.log(error)
 
 }else{
-
-alert("Lead gespeichert")
 
 loadLeads()
 
@@ -109,6 +123,8 @@ return
 }
 
 data.forEach(lead => {
+
+visitedHouses[lead.street + lead.number] = true
 
 let color = "blue"
 
