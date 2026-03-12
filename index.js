@@ -25,14 +25,10 @@ password: password
 })
 
 if(error){
-
 alert("Login fehlgeschlagen")
 console.log(error)
-
 }else{
-
 document.getElementById("login").style.display = "none"
-
 }
 
 }
@@ -63,12 +59,10 @@ function addLeadMarker(lat,lng,street,number,status){
 const color = getMarkerColor(status)
 
 L.circleMarker([lat,lng],{
-
 radius:10,
 color:color,
 fillColor:color,
 fillOpacity:0.8
-
 })
 .addTo(leadLayer)
 .bindPopup(street + " " + number + "<br>" + status)
@@ -108,16 +102,21 @@ lead.status
 
 
 
-// HÄUSER GENERIEREN
+// HAUSNUMMERN LADEN
 
-function generateStreetHouses(){
+async function loadStreetHouses(streetName){
 
 houseLayer.clearLayers()
 
-for(let i = -10; i <= 10; i++){
+const url = "https://nominatim.openstreetmap.org/search?street="+streetName+"&format=json"
 
-const lat = userLat + (i * 0.00003)
-const lng = userLng
+const response = await fetch(url)
+const data = await response.json()
+
+data.forEach(house => {
+
+const lat = parseFloat(house.lat)
+const lng = parseFloat(house.lon)
 
 L.circleMarker([lat,lng],{
 
@@ -128,9 +127,8 @@ fillOpacity:1
 
 })
 .addTo(houseLayer)
-.bindPopup("Haus")
 
-}
+})
 
 }
 
@@ -168,8 +166,13 @@ const data = await response.json()
 
 if(data.address){
 
-document.getElementById("street").value = data.address.road || ""
-document.getElementById("number").value = data.address.house_number || ""
+const street = data.address.road || ""
+const number = data.address.house_number || ""
+
+document.getElementById("street").value = street
+document.getElementById("number").value = number
+
+loadStreetHouses(street)
 
 }
 
@@ -193,8 +196,6 @@ L.marker([userLat,userLng])
 .openPopup()
 
 loadLeads()
-
-generateStreetHouses()
 
 })
 
