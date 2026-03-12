@@ -43,6 +43,30 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map)
 
+  map.on("click", async function(e){
+
+const lat = e.latlng.lat
+const lng = e.latlng.lng
+
+userLat = lat
+userLng = lng
+
+L.marker([lat,lng]).addTo(map)
+
+const url = "https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lng
+
+const response = await fetch(url)
+const data = await response.json()
+
+if(data.address){
+
+document.getElementById("street").value = data.address.road || ""
+document.getElementById("number").value = data.address.house_number || ""
+
+}
+
+})
+
 navigator.geolocation.getCurrentPosition(position => {
 
 userLat = position.coords.latitude
