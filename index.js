@@ -1,292 +1,136 @@
-const supabaseUrl = "https://vnfnclfqgcqlofjzefye.supabase.co"
-const supabaseKey = "sb_publishable_q3gMEue0WevkMEEwGzGv-w_jE9eFdNr"
+<!DOCTYPE html>
+<html>
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
+<head>
 
-let map
-let userLat
-let userLng
-let currentUser
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-let leadLayer
-let routeLayer
+<title>PrimaLeads</title>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-// LOGIN
+<style>
 
-async function login(){
-
-const email = document.getElementById("email").value
-const password = document.getElementById("password").value
-
-const { data, error } = await supabaseClient.auth.signInWithPassword({
-email: email,
-password: password
-})
-
-if(error){
-
-alert("Login fehlgeschlagen")
-console.log(error)
-
-}else{
-
-currentUser = data.user
-
-document.getElementById("login").style.display = "none"
-
-loadDashboard()
-
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
 }
 
+.header{
+background:#000;
+color:white;
+padding:15px;
+text-align:center;
 }
 
-
-
-
-// DASHBOARD
-
-async function loadDashboard(){
-
-const { data, error } = await supabaseClient
-.from("Leads")
-.select("*")
-
-if(error){
-console.log(error)
-return
+.logo{
+height:40px;
+margin-bottom:5px;
 }
 
-let total = data.length
-let pv = 0
-let wp = 0
-let kein = 0
-let zuhause = 0
-
-data.forEach(lead => {
-
-if(lead.status === "PV Interesse") pv++
-if(lead.status === "WP Interesse") wp++
-if(lead.status === "Kein Interesse") kein++
-if(lead.status === "Niemand zuhause") zuhause++
-
-})
-
-document.getElementById("totalLeads").innerText = total
-document.getElementById("pvLeads").innerText = pv
-document.getElementById("wpLeads").innerText = wp
-document.getElementById("keinLeads").innerText = kein
-document.getElementById("zuhauseLeads").innerText = zuhause
-
+.container{
+padding:15px;
 }
 
-
-
-
-// MARKER FARBE
-
-function getMarkerColor(status){
-
-if(status === "PV Interesse") return "green"
-if(status === "WP Interesse") return "blue"
-if(status === "Kein Interesse") return "red"
-if(status === "Niemand zuhause") return "gray"
-
-return "black"
-
+#map{
+height:50vh;
+border-radius:10px;
+margin-bottom:20px;
 }
 
-
-
-
-// LEAD MARKER
-
-function addLeadMarker(lat,lng,street,number,status){
-
-const color = getMarkerColor(status)
-
-L.circleMarker([lat,lng],{
-radius:10,
-color:color,
-fillColor:color,
-fillOpacity:0.8
-})
-.addTo(leadLayer)
-.bindPopup(street + " " + number + "<br>" + status)
-
+input{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
-
-
-
-// LEADS LADEN
-
-async function loadLeads(){
-
-const { data, error } = await supabaseClient
-.from("Leads")
-.select("*")
-
-if(error){
-console.log(error)
-return
+.buttons{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
 }
 
-data.forEach(lead => {
-
-addLeadMarker(
-lead.lat,
-lead.lng,
-lead.street,
-lead.number,
-lead.status
-)
-
-})
-
+button{
+padding:15px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+font-size:16px;
+color:white;
 }
 
-
-
-
-// ROUTE GENERIEREN
-
-function generateRoute(){
-
-routeLayer.clearLayers()
-
-for(let i = 1; i <= 5; i++){
-
-const lat = userLat + (i * 0.0002)
-const lng = userLng
-
-L.marker([lat,lng])
-.addTo(routeLayer)
-.bindPopup("Nächste Straße")
-
+.pv{
+background:#2ecc71;
 }
 
+.wp{
+background:#3498db;
 }
 
-
-
-
-// MAP START
-
-function startRoute(){
-
-map = L.map("map").setView([48.62,9.05],16)
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-maxZoom:19
-}).addTo(map)
-
-leadLayer = L.layerGroup().addTo(map)
-routeLayer = L.layerGroup().addTo(map)
-
-
-// HAUS KLICK
-
-map.on("click", async function(e){
-
-const lat = e.latlng.lat
-const lng = e.latlng.lng
-
-userLat = lat
-userLng = lng
-
-const url = "https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lng
-
-const response = await fetch(url)
-const data = await response.json()
-
-if(data.address){
-
-document.getElementById("street").value = data.address.road || ""
-document.getElementById("number").value = data.address.house_number || ""
-
+.no{
+background:#e74c3c;
 }
 
-})
-
-
-
-
-// GPS POSITION
-
-navigator.geolocation.getCurrentPosition(position => {
-
-userLat = position.coords.latitude
-userLng = position.coords.longitude
-
-map.setView([userLat,userLng],18)
-
-L.marker([userLat,userLng])
-.addTo(map)
-.bindPopup("Du bist hier")
-.openPopup()
-
-loadLeads()
-
-generateRoute()
-
-})
-
+.none{
+background:#7f8c8d;
 }
 
-
-
-
-// LEAD SPEICHERN
-
-async function saveLead(status){
-
-const street = document.getElementById("street").value
-const number = document.getElementById("number").value
-
-
-const { data: existingLead } = await supabaseClient
-.from("Leads")
-.select("*")
-.eq("street", street)
-.eq("number", number)
-
-if(existingLead && existingLead.length > 0){
-
-alert("Haus bereits erfasst")
-return
-
+.start{
+background:#000;
+width:100%;
+margin-bottom:10px;
 }
 
+</style>
+
+</head>
 
 
-const { error } = await supabaseClient
-.from("Leads")
-.insert([
-{
-street: street,
-number: number,
-status: status,
-lat: userLat,
-lng: userLng,
-setter: currentUser.id
-}
-])
+<body>
 
-if(error){
+<div class="header">
 
-console.log(error)
-alert("Fehler beim Speichern")
+<img src="logo.png" class="logo">
 
-}else{
+<div>PRIMALEADS</div>
 
-addLeadMarker(userLat,userLng,street,number,status)
+</div>
 
-loadDashboard()
 
-alert("Lead gespeichert")
+<div class="container">
 
-}
+<button class="start" onclick="startRoute()">Route starten</button>
 
-}
+<div id="map"></div>
+
+<h3>Haus erfassen</h3>
+
+<input id="street" placeholder="Straße">
+<input id="number" placeholder="Hausnummer">
+
+<div class="buttons">
+
+<button class="pv" onclick="saveLead('PV Interesse')">PV Interesse</button>
+
+<button class="wp" onclick="saveLead('WP Interesse')">WP Interesse</button>
+
+<button class="no" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+
+<button class="none" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+
+</div>
+
+</div>
+
+<script src="index.js"></script>
+
+</body>
+
+</html>
