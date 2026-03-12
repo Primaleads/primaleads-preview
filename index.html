@@ -1,43 +1,109 @@
 <!DOCTYPE html>
 <html>
 
-<h2>PrimaLeads Dashboard</h2>
-
-Gesamt Leads: <span id="totalLeads">0</span><br>
-PV Interesse: <span id="pvLeads">0</span><br>
-WP Interesse: <span id="wpLeads">0</span><br>
-Kein Interesse: <span id="keinLeads">0</span><br>
-Niemand zuhause: <span id="zuhauseLeads">0</span>
 <head>
 
 <meta charset="UTF-8">
-<title>PrimaLeads App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PrimaLeads</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 
 body{
-  font-family: Arial;
-  padding:20px;
+
+font-family:Arial;
+margin:0;
+background:#0f0f0f;
+color:white;
+
 }
 
-#login{
-  margin-bottom:30px;
+header{
+
+background:#0f0f0f;
+padding:20px;
+text-align:center;
+border-bottom:1px solid #333;
+
 }
 
-#map{
-  height:400px;
-  margin-bottom:20px;
+.logo{
+
+font-size:28px;
+font-weight:bold;
+color:#c6a55b;
+
+}
+
+.container{
+
+padding:20px;
+
+}
+
+.dashboard{
+
+background:#1a1a1a;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+
+}
+
+.dashboard span{
+
+color:#c6a55b;
+font-weight:bold;
+
 }
 
 button{
-  margin:5px;
-  padding:10px;
+
+background:#c6a55b;
+border:none;
+padding:12px 16px;
+margin:5px;
+border-radius:6px;
+color:black;
+font-weight:bold;
+cursor:pointer;
+
+}
+
+button:hover{
+
+opacity:0.9;
+
+}
+
+input{
+
+padding:12px;
+border-radius:6px;
+border:none;
+margin:5px;
+width:220px;
+
+}
+
+#map{
+
+height:420px;
+border-radius:10px;
+margin-top:15px;
+
+}
+
+.status-buttons button{
+
+width:200px;
+
 }
 
 </style>
@@ -46,42 +112,75 @@ button{
 
 <body>
 
+<header>
+
+<div class="logo">PrimaLeads</div>
+
+</header>
+
+<div class="container">
+
 <div id="login">
 
-<h1>PRIMALEADS</h1>
+<h3>Login</h3>
 
-<input id="email" placeholder="Email"><br><br>
+<input id="email" placeholder="Email">
+<br>
 
-<input id="password" type="password" placeholder="Passwort"><br><br>
+<input id="password" type="password" placeholder="Passwort">
+
+<br><br>
 
 <button onclick="login()">Login</button>
 
 </div>
 
-<h1>PrimaLeads Route</h1>
+
+<div class="dashboard">
+
+<h3>Dashboard</h3>
+
+Gesamt Leads: <span id="totalLeads">0</span><br>
+PV Interesse: <span id="pvLeads">0</span><br>
+WP Interesse: <span id="wpLeads">0</span><br>
+Kein Interesse: <span id="keinLeads">0</span><br>
+Niemand zuhause: <span id="zuhauseLeads">0</span>
+
+</div>
+
 
 <button onclick="startRoute()">Route starten</button>
 
 <div id="map"></div>
 
-<h2>Haus erfassen</h2>
 
-<input id="street" placeholder="Straße"><br><br>
+<h3>Haus erfassen</h3>
 
-<input id="number" placeholder="Hausnummer"><br><br>
+<input id="street" placeholder="Straße">
+<br>
 
-Status:<br><br>
+<input id="number" placeholder="Hausnummer">
+
+<div class="status-buttons">
+
+<br>
 
 <button onclick="saveLead('PV Interesse')">PV Interesse</button>
+<br>
 
 <button onclick="saveLead('WP Interesse')">WP Interesse</button>
+<br>
 
 <button onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+<br>
 
 <button onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+
+</div>
+
+</div>
 
 <script src="index.js"></script>
 
 </body>
-
 </html>
