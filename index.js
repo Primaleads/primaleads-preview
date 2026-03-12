@@ -6,8 +6,8 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
 let map
 let userLat
 let userLng
+let currentUser
 
-let houseLayer
 let leadLayer
 
 
@@ -19,17 +19,64 @@ async function login(){
 const email = document.getElementById("email").value
 const password = document.getElementById("password").value
 
-const { error } = await supabaseClient.auth.signInWithPassword({
+const { data, error } = await supabaseClient.auth.signInWithPassword({
 email: email,
 password: password
 })
 
 if(error){
+
 alert("Login fehlgeschlagen")
 console.log(error)
+
 }else{
+
+currentUser = data.user
+
 document.getElementById("login").style.display = "none"
+
+loadDashboard()
+
 }
+
+}
+
+
+
+
+// DASHBOARD
+
+async function loadDashboard(){
+
+const { data, error } = await supabaseClient
+.from("Leads")
+.select("*")
+
+if(error){
+console.log(error)
+return
+}
+
+let total = data.length
+let pv = 0
+let wp = 0
+let kein = 0
+let zuhause = 0
+
+data.forEach(lead => {
+
+if(lead.status === "PV Interesse") pv++
+if(lead.status === "WP Interesse") wp++
+if(lead.status === "Kein Interesse") kein++
+if(lead.status === "Niemand zuhause") zuhause++
+
+})
+
+document.getElementById("totalLeads").innerText = total
+document.getElementById("pvLeads").innerText = pv
+document.getElementById("wpLeads").innerText = wp
+document.getElementById("keinLeads").innerText = kein
+document.getElementById("zuhauseLeads").innerText = zuhause
 
 }
 
@@ -52,7 +99,7 @@ return "black"
 
 
 
-// LEAD MARKER
+// MARKER
 
 function addLeadMarker(lat,lng,street,number,status){
 
@@ -102,39 +149,6 @@ lead.status
 
 
 
-// HAUSNUMMERN LADEN
-
-async function loadStreetHouses(streetName){
-
-houseLayer.clearLayers()
-
-const url = "https://nominatim.openstreetmap.org/search?street="+streetName+"&format=json"
-
-const response = await fetch(url)
-const data = await response.json()
-
-data.forEach(house => {
-
-const lat = parseFloat(house.lat)
-const lng = parseFloat(house.lon)
-
-L.circleMarker([lat,lng],{
-
-radius:6,
-color:"black",
-fillColor:"white",
-fillOpacity:1
-
-})
-.addTo(houseLayer)
-
-})
-
-}
-
-
-
-
 // MAP START
 
 function startRoute(){
@@ -145,7 +159,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
 maxZoom:19
 }).addTo(map)
 
-houseLayer = L.layerGroup().addTo(map)
 leadLayer = L.layerGroup().addTo(map)
 
 
@@ -166,13 +179,8 @@ const data = await response.json()
 
 if(data.address){
 
-const street = data.address.road || ""
-const number = data.address.house_number || ""
-
-document.getElementById("street").value = street
-document.getElementById("number").value = number
-
-loadStreetHouses(street)
+document.getElementById("street").value = data.address.road || ""
+document.getElementById("number").value = data.address.house_number || ""
 
 }
 
@@ -235,7 +243,8 @@ street: street,
 number: number,
 status: status,
 lat: userLat,
-lng: userLng
+lng: userLng,
+setter: currentUser.id
 }
 ])
 
@@ -247,6 +256,8 @@ alert("Fehler beim Speichern")
 }else{
 
 addLeadMarker(userLat,userLng,street,number,status)
+
+loadDashboard()
 
 alert("Lead gespeichert")
 
