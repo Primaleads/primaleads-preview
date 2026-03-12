@@ -24,9 +24,7 @@ if(error){
 alert("Login fehlgeschlagen")
 console.log(error)
 }else{
-
 document.getElementById("login").style.display = "none"
-
 }
 
 }
@@ -43,7 +41,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map)
 
-  map.on("click", async function(e){
+
+// Haus anklicken → Adresse erkennen
+
+map.on("click", async function(e){
 
 const lat = e.latlng.lat
 const lng = e.latlng.lng
@@ -67,6 +68,9 @@ document.getElementById("number").value = data.address.house_number || ""
 
 })
 
+
+// GPS Position
+
 navigator.geolocation.getCurrentPosition(position => {
 
 userLat = position.coords.latitude
@@ -78,8 +82,11 @@ L.marker([userLat,userLng])
 .addTo(map)
 .bindPopup("Du bist hier")
 .openPopup()
+
+// gespeicherte Leads laden
+
 loadLeads()
-  
+
 })
 
 }
@@ -116,6 +123,10 @@ alert("Lead gespeichert")
 
 }
 
+
+
+// LEADS LADEN
+
 async function loadLeads(){
 
 const { data, error } = await supabaseClient
@@ -137,8 +148,10 @@ if(lead.status === "Kein Interesse") color = "red"
 if(lead.status === "Niemand zuhause") color = "gray"
 
 L.circleMarker([lead.lat, lead.lng],{
-radius:8,
-color:color
+radius:10,
+color:color,
+fillColor:color,
+fillOpacity:0.8
 })
 .addTo(map)
 .bindPopup(
