@@ -90,3 +90,36 @@ alert("Lead gespeichert")
 }
 
 }
+
+async function loadLeads(){
+
+const { data, error } = await supabaseClient
+.from("Leads")
+.select("*")
+
+if(error){
+console.log(error)
+return
+}
+
+data.forEach(lead => {
+
+let color = "blue"
+
+if(lead.status === "PV Interesse") color = "green"
+if(lead.status === "WP Interesse") color = "blue"
+if(lead.status === "Kein Interesse") color = "red"
+if(lead.status === "Niemand zuhause") color = "gray"
+
+L.circleMarker([lead.lat, lead.lng],{
+radius:8,
+color:color
+})
+.addTo(map)
+.bindPopup(
+lead.street + " " + lead.number + "<br>" + lead.status
+)
+
+})
+
+}
