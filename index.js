@@ -54,7 +54,8 @@ L.marker([userLat,userLng])
 .addTo(map)
 .bindPopup("Du bist hier")
 .openPopup()
-
+loadLeads()
+  
 })
 
 }
