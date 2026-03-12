@@ -7,6 +7,9 @@ let map
 let userLat
 let userLng
 
+let houseLayer
+let leadLayer
+
 
 
 // LOGIN
@@ -53,7 +56,7 @@ return "black"
 
 
 
-// MARKER SETZEN
+// LEAD MARKER
 
 function addLeadMarker(lat,lng,street,number,status){
 
@@ -67,7 +70,7 @@ fillColor:color,
 fillOpacity:0.8
 
 })
-.addTo(map)
+.addTo(leadLayer)
 .bindPopup(street + " " + number + "<br>" + status)
 
 }
@@ -84,10 +87,8 @@ const { data, error } = await supabaseClient
 .select("*")
 
 if(error){
-
 console.log(error)
 return
-
 }
 
 data.forEach(lead => {
@@ -107,21 +108,29 @@ lead.status
 
 
 
-// ROUTE MARKER
+// HÄUSER GENERIEREN
 
-function showNextHouse(){
+function generateStreetHouses(){
 
-if(!userLat || !userLng) return
+houseLayer.clearLayers()
 
-const step = 0.0001
+for(let i = -10; i <= 10; i++){
 
-const nextLat = userLat + step
-const nextLng = userLng
+const lat = userLat + (i * 0.00003)
+const lng = userLng
 
-L.marker([nextLat,nextLng])
-.addTo(map)
-.bindPopup("Nächstes Haus")
-.openPopup()
+L.circleMarker([lat,lng],{
+
+radius:6,
+color:"black",
+fillColor:"white",
+fillOpacity:1
+
+})
+.addTo(houseLayer)
+.bindPopup("Haus")
+
+}
 
 }
 
@@ -137,6 +146,9 @@ map = L.map("map").setView([48.62,9.05],16)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
 maxZoom:19
 }).addTo(map)
+
+houseLayer = L.layerGroup().addTo(map)
+leadLayer = L.layerGroup().addTo(map)
 
 
 // HAUS KLICK
@@ -182,7 +194,7 @@ L.marker([userLat,userLng])
 
 loadLeads()
 
-showNextHouse()
+generateStreetHouses()
 
 })
 
@@ -199,8 +211,6 @@ const street = document.getElementById("street").value
 const number = document.getElementById("number").value
 
 
-// DOPPELTE HÄUSER VERMEIDEN
-
 const { data: existingLead } = await supabaseClient
 .from("Leads")
 .select("*")
@@ -215,8 +225,6 @@ return
 }
 
 
-
-// SPEICHERN
 
 const { error } = await supabaseClient
 .from("Leads")
