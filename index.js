@@ -7,6 +7,34 @@ let userLat
 let userLng
 let map
 
+
+// LOGIN
+
+async function login(){
+
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+
+const { data, error } = await supabaseClient.auth.signInWithPassword({
+email: email,
+password: password
+})
+
+if(error){
+alert("Login fehlgeschlagen")
+console.log(error)
+}else{
+
+document.getElementById("login").style.display = "none"
+
+}
+
+}
+
+
+
+// MAP START
+
 function startRoute(){
 
 map = L.map('map').setView([48.62,9.05],16)
@@ -28,7 +56,12 @@ L.marker([userLat,userLng])
 .openPopup()
 
 })
+
 }
+
+
+
+// LEAD SPEICHERN
 
 async function saveLead(status){
 
