@@ -1,136 +1,131 @@
-<!DOCTYPE html>
-<html>
+const supabaseUrl = "https://vnfnclfqgcqlofjzefye.supabase.co"
+const supabaseKey = "sb_publishable_q3gMEue0WevkMEEwGzGv-w_jE9eFdNr"
 
-<head>
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+let map
+let userLat
+let userLng
 
-<title>PrimaLeads</title>
+function startRoute(){
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+map = L.map('map').setView([48.62,9.05],16)
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map)
 
-<style>
+navigator.geolocation.getCurrentPosition(position => {
 
-body{
-margin:0;
-font-family:Arial;
-background:#f5f5f5;
+userLat = position.coords.latitude
+userLng = position.coords.longitude
+
+map.setView([userLat,userLng],18)
+
+L.marker([userLat,userLng])
+.addTo(map)
+.bindPopup("Du bist hier")
+.openPopup()
+
+loadLeads()
+
+})
+
+map.on("click", async function(e){
+
+userLat = e.latlng.lat
+userLng = e.latlng.lng
+
+L.marker([userLat,userLng]).addTo(map)
+
+const url =
+"https://nominatim.openstreetmap.org/reverse?format=json&lat="
++userLat+
+"&lon="
++userLng
+
+const response = await fetch(url)
+const data = await response.json()
+
+if(data.address){
+
+document.getElementById("street").value =
+data.address.road || ""
+
+document.getElementById("number").value =
+data.address.house_number || ""
+
 }
 
-.header{
-background:#000;
-color:white;
-padding:15px;
-text-align:center;
+})
+
 }
 
-.logo{
-height:40px;
-margin-bottom:5px;
+
+
+async function saveLead(status){
+
+const street = document.getElementById("street").value
+const number = document.getElementById("number").value
+
+const { error } = await supabaseClient
+.from("Leads")
+.insert([
+{
+street: street,
+number: number,
+status: status,
+lat: userLat,
+lng: userLng
+}
+])
+
+if(error){
+
+alert("Fehler beim Speichern")
+console.log(error)
+
+}else{
+
+alert("Lead gespeichert")
+
+loadLeads()
+
 }
 
-.container{
-padding:15px;
 }
 
-#map{
-height:50vh;
-border-radius:10px;
-margin-bottom:20px;
+
+
+async function loadLeads(){
+
+const { data, error } = await supabaseClient
+.from("Leads")
+.select("*")
+
+if(error){
+console.log(error)
+return
 }
 
-input{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border-radius:8px;
-border:1px solid #ccc;
+data.forEach(lead => {
+
+let color = "blue"
+
+if(lead.status === "PV Interesse") color = "green"
+if(lead.status === "WP Interesse") color = "blue"
+if(lead.status === "Kein Interesse") color = "red"
+if(lead.status === "Niemand zuhause") color = "gray"
+
+L.circleMarker([lead.lat, lead.lng],{
+radius:8,
+color:color
+})
+.addTo(map)
+.bindPopup(
+lead.street + " " + lead.number + "<br>" + lead.status
+)
+
+})
+
 }
-
-.buttons{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
-button{
-padding:15px;
-border:none;
-border-radius:10px;
-font-weight:bold;
-font-size:16px;
-color:white;
-}
-
-.pv{
-background:#2ecc71;
-}
-
-.wp{
-background:#3498db;
-}
-
-.no{
-background:#e74c3c;
-}
-
-.none{
-background:#7f8c8d;
-}
-
-.start{
-background:#000;
-width:100%;
-margin-bottom:10px;
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-<div class="header">
-
-<img src="logo.png" class="logo">
-
-<div>PRIMALEADS</div>
-
-</div>
-
-
-<div class="container">
-
-<button class="start" onclick="startRoute()">Route starten</button>
-
-<div id="map"></div>
-
-<h3>Haus erfassen</h3>
-
-<input id="street" placeholder="Straße">
-<input id="number" placeholder="Hausnummer">
-
-<div class="buttons">
-
-<button class="pv" onclick="saveLead('PV Interesse')">PV Interesse</button>
-
-<button class="wp" onclick="saveLead('WP Interesse')">WP Interesse</button>
-
-<button class="no" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-
-<button class="none" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
-
-</div>
-
-</div>
-
-<script src="index.js"></script>
-
-</body>
-
-</html>
