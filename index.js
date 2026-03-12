@@ -9,6 +9,7 @@ let userLng
 let currentUser
 
 let leadLayer
+let streetLayer
 
 
 
@@ -99,20 +100,54 @@ return "black"
 
 
 
-// MARKER
+// LEAD MARKER
 
 function addLeadMarker(lat,lng,street,number,status){
 
 const color = getMarkerColor(status)
 
 L.circleMarker([lat,lng],{
+
 radius:10,
 color:color,
 fillColor:color,
 fillOpacity:0.8
+
 })
 .addTo(leadLayer)
 .bindPopup(street + " " + number + "<br>" + status)
+
+}
+
+
+
+
+// STRASSEN STATUS
+
+async function updateStreetStatus(street){
+
+const { data } = await supabaseClient
+.from("Leads")
+.select("*")
+.eq("street",street)
+
+if(!data) return
+
+let houses = data.length
+
+let color = "yellow"
+
+if(houses > 10) color = "green"
+
+L.circle([userLat,userLng],{
+
+radius:80,
+color:color,
+fillColor:color,
+fillOpacity:0.2
+
+})
+.addTo(streetLayer)
 
 }
 
@@ -160,6 +195,7 @@ maxZoom:19
 }).addTo(map)
 
 leadLayer = L.layerGroup().addTo(map)
+streetLayer = L.layerGroup().addTo(map)
 
 
 // HAUS KLICK
@@ -179,8 +215,13 @@ const data = await response.json()
 
 if(data.address){
 
-document.getElementById("street").value = data.address.road || ""
-document.getElementById("number").value = data.address.house_number || ""
+const street = data.address.road || ""
+const number = data.address.house_number || ""
+
+document.getElementById("street").value = street
+document.getElementById("number").value = number
+
+updateStreetStatus(street)
 
 }
 
@@ -258,6 +299,8 @@ alert("Fehler beim Speichern")
 addLeadMarker(userLat,userLng,street,number,status)
 
 loadDashboard()
+
+updateStreetStatus(street)
 
 alert("Lead gespeichert")
 
