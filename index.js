@@ -10,7 +10,8 @@ let userLng
 let routePath = []
 let routeLine
 
-
+let heatLayerWP
+let heatLayerPV
 
 function startRoute(){
 
@@ -19,7 +20,6 @@ map = L.map('map').setView([48.62,9.05],16)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map)
-
 
 navigator.geolocation.watchPosition(position => {
 
@@ -39,16 +39,9 @@ color:"black",
 weight:4
 }).addTo(map)
 
-
-L.circleMarker([userLat,userLng],{
-radius:6,
-color:"black"
-}).addTo(map)
-
 loadLeads()
 
 })
-
 
 map.on("click", async function(e){
 
@@ -78,13 +71,10 @@ data.address.house_number || ""
 
 }
 
-
-
 async function saveLead(status){
 
 const street = document.getElementById("street").value
 const number = document.getElementById("number").value
-
 
 const { error } = await supabaseClient
 .from("Leads")
@@ -101,6 +91,7 @@ lng: userLng
 if(error){
 
 alert("Fehler beim Speichern")
+console.log(error)
 
 }else{
 
@@ -109,8 +100,6 @@ loadLeads()
 }
 
 }
-
-
 
 async function loadLeads(){
 
@@ -123,12 +112,23 @@ console.log(error)
 return
 }
 
+let heatPointsWP = []
+let heatPointsPV = []
+
 data.forEach(lead => {
 
 let color = "blue"
 
-if(lead.status === "PV Interesse") color = "green"
-if(lead.status === "WP Interesse") color = "blue"
+if(lead.status === "PV Interesse"){
+color = "green"
+heatPointsPV.push([lead.lat, lead.lng, 1])
+}
+
+if(lead.status === "WP Interesse"){
+color = "blue"
+heatPointsWP.push([lead.lat, lead.lng, 1])
+}
+
 if(lead.status === "Kein Interesse") color = "red"
 if(lead.status === "Niemand zuhause") color = "gray"
 
@@ -142,5 +142,23 @@ lead.street + " " + lead.number + "<br>" + lead.status
 )
 
 })
+
+if(heatLayerWP){
+map.removeLayer(heatLayerWP)
+}
+
+if(heatLayerPV){
+map.removeLayer(heatLayerPV)
+}
+
+heatLayerWP = L.heatLayer(heatPointsWP,{
+radius:25,
+blur:20
+}).addTo(map)
+
+heatLayerPV = L.heatLayer(heatPointsPV,{
+radius:25,
+blur:20
+}).addTo(map)
 
 }
