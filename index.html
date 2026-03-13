@@ -10,8 +10,10 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
 
@@ -66,21 +68,10 @@ font-size:16px;
 color:white;
 }
 
-.pv{
-background:#2ecc71;
-}
-
-.wp{
-background:#3498db;
-}
-
-.no{
-background:#e74c3c;
-}
-
-.none{
-background:#7f8c8d;
-}
+.pv{ background:#2ecc71; }
+.wp{ background:#3498db; }
+.no{ background:#e74c3c; }
+.none{ background:#7f8c8d; }
 
 .start{
 background:#000;
@@ -118,11 +109,8 @@ margin-bottom:10px;
 <div class="buttons">
 
 <button class="pv" onclick="saveLead('PV Interesse')">PV Interesse</button>
-
 <button class="wp" onclick="saveLead('WP Interesse')">WP Interesse</button>
-
 <button class="no" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-
 <button class="none" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
 
 </div>
@@ -132,5 +120,4 @@ margin-bottom:10px;
 <script src="index.js"></script>
 
 </body>
-
 </html>
