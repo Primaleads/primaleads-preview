@@ -119,6 +119,11 @@ margin-bottom:10px;
 </div>
 
 <script src="index.js"></script>
-
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+  .then(() => console.log("Service Worker registriert"));
+}
+</script>
 </body>
 </html>
