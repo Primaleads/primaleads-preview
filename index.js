@@ -7,7 +7,10 @@ let map
 let userLat
 let userLng
 
-let visitedHouses = {}
+let routePath = []
+let routeLine
+
+
 
 function startRoute(){
 
@@ -17,21 +20,35 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map)
 
-navigator.geolocation.getCurrentPosition(position => {
+
+navigator.geolocation.watchPosition(position => {
 
 userLat = position.coords.latitude
 userLng = position.coords.longitude
 
 map.setView([userLat,userLng],18)
 
-L.marker([userLat,userLng])
-.addTo(map)
-.bindPopup("Du bist hier")
-.openPopup()
+routePath.push([userLat,userLng])
+
+if(routeLine){
+map.removeLayer(routeLine)
+}
+
+routeLine = L.polyline(routePath,{
+color:"black",
+weight:4
+}).addTo(map)
+
+
+L.circleMarker([userLat,userLng],{
+radius:6,
+color:"black"
+}).addTo(map)
 
 loadLeads()
 
 })
+
 
 map.on("click", async function(e){
 
@@ -49,23 +66,11 @@ const data = await response.json()
 
 if(data.address){
 
-const street = data.address.road || ""
-const number = data.address.house_number || ""
+document.getElementById("street").value =
+data.address.road || ""
 
-document.getElementById("street").value = street
-document.getElementById("number").value = number
-
-const key = street + number
-
-if(visitedHouses[key]){
-
-L.circleMarker([userLat,userLng],{
-radius:10,
-color:"black",
-fillOpacity:0.2
-}).addTo(map)
-
-}
+document.getElementById("number").value =
+data.address.house_number || ""
 
 }
 
@@ -80,9 +85,6 @@ async function saveLead(status){
 const street = document.getElementById("street").value
 const number = document.getElementById("number").value
 
-const key = street + number
-
-visitedHouses[key] = true
 
 const { error } = await supabaseClient
 .from("Leads")
@@ -99,7 +101,6 @@ lng: userLng
 if(error){
 
 alert("Fehler beim Speichern")
-console.log(error)
 
 }else{
 
@@ -123,8 +124,6 @@ return
 }
 
 data.forEach(lead => {
-
-visitedHouses[lead.street + lead.number] = true
 
 let color = "blue"
 
