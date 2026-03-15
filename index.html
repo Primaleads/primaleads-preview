@@ -15,7 +15,7 @@
 
   <style>
     :root{
-      --bg:#f4f4f5;
+      --bg:#f3f4f6;
       --card:#ffffff;
       --text:#111111;
       --muted:#6b7280;
@@ -25,7 +25,8 @@
       --blue:#3498db;
       --red:#e74c3c;
       --gray:#7f8c8d;
-      --shadow:0 10px 25px rgba(0,0,0,0.08);
+      --orange:#f39c12;
+      --shadow:0 10px 30px rgba(0,0,0,0.08);
       --radius:18px;
     }
 
@@ -38,37 +39,37 @@
       color:var(--text);
     }
 
-    .app-shell{
+    .app{
+      max-width:580px;
+      margin:0 auto;
       min-height:100vh;
+      background:var(--bg);
       display:flex;
       flex-direction:column;
-      max-width:560px;
-      margin:0 auto;
-      background:var(--bg);
     }
 
-    .topbar{
+    .header{
       background:#000;
       color:#fff;
-      padding:18px 18px 14px;
       text-align:center;
+      padding:18px 16px 14px;
       position:sticky;
       top:0;
-      z-index:30;
+      z-index:20;
       box-shadow:0 6px 18px rgba(0,0,0,0.16);
     }
 
-    .topbar img{
+    .header img{
       height:42px;
-      object-fit:contain;
       display:block;
       margin:0 auto 8px;
+      object-fit:contain;
     }
 
     .brand{
       font-size:15px;
       letter-spacing:.08em;
-      font-weight:700;
+      font-weight:800;
     }
 
     .content{
@@ -84,8 +85,8 @@
       margin-bottom:16px;
     }
 
-    .login-card{
-      margin-top:20px;
+    .hidden{
+      display:none !important;
     }
 
     h1,h2,h3,p{
@@ -102,15 +103,15 @@
       color:var(--muted);
     }
 
-    input, textarea, select{
+    input,textarea{
       width:100%;
       border:1px solid var(--line);
-      background:#fff;
       border-radius:14px;
       padding:14px;
       font-size:16px;
       margin-bottom:10px;
       outline:none;
+      background:#fff;
     }
 
     textarea{
@@ -126,37 +127,13 @@
       font-size:17px;
       font-weight:800;
       cursor:pointer;
-      transition:.18s ease;
     }
 
-    .btn:active{
-      transform:scale(.98);
-    }
-
-    .btn-black{
-      background:#000;
-      color:#fff;
-    }
-
-    .btn-green{
-      background:var(--green);
-      color:#fff;
-    }
-
-    .btn-blue{
-      background:var(--blue);
-      color:#fff;
-    }
-
-    .btn-red{
-      background:var(--red);
-      color:#fff;
-    }
-
-    .btn-gray{
-      background:var(--gray);
-      color:#fff;
-    }
+    .btn-black{background:#000;color:#fff}
+    .btn-green{background:var(--green);color:#fff}
+    .btn-blue{background:var(--blue);color:#fff}
+    .btn-red{background:var(--red);color:#fff}
+    .btn-gray{background:var(--gray);color:#fff}
 
     .grid-2{
       display:grid;
@@ -188,58 +165,68 @@
       font-weight:800;
     }
 
-    .rank-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .rank-item{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:12px 14px;
-      background:#fafafa;
-      border:1px solid var(--line);
-      border-radius:14px;
-      font-weight:700;
-    }
-
     .quote-row{
       display:grid;
       grid-template-columns:1fr 1fr 1fr;
       gap:10px;
-      margin-top:8px;
     }
 
     .quote-box{
       border-radius:14px;
       padding:14px;
       color:#fff;
-      font-weight:800;
       text-align:center;
+      font-weight:800;
     }
 
     .quote-box small{
       display:block;
-      opacity:.9;
-      font-weight:600;
       margin-bottom:6px;
+      opacity:.92;
+      font-weight:700;
     }
 
-    #map{
-      height:48vh;
-      min-height:360px;
-      border-radius:20px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      margin-bottom:16px;
-    }
-
-    .lead-list{
+    .rank-list,.street-list,.lead-list{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
+    }
+
+    .rank-item,.street-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:#fafafa;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:800;
+    }
+
+    .street-item{
+      align-items:flex-start;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .street-name{
+      font-size:17px;
+      font-weight:800;
+    }
+
+    .street-meta{
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .street-score{
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#000;
+      color:#fff;
+      font-weight:800;
     }
 
     .lead-card{
@@ -259,6 +246,7 @@
       font-size:14px;
       color:var(--muted);
       margin-bottom:4px;
+      line-height:1.35;
     }
 
     .chip-row{
@@ -274,48 +262,13 @@
       padding:8px 12px;
       font-size:13px;
       font-weight:800;
-      cursor:pointer;
       color:#fff;
+      cursor:pointer;
     }
 
     .chip.green{background:var(--green)}
-    .chip.blue{background:var(--blue)}
-    .chip.red{background:var(--red)}
     .chip.gray{background:var(--gray)}
-    .chip.black{background:#000}
-
-    .tabs{
-      position:fixed;
-      bottom:0;
-      left:50%;
-      transform:translateX(-50%);
-      width:100%;
-      max-width:560px;
-      background:#fff;
-      border-top:1px solid var(--line);
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      z-index:40;
-      box-shadow:0 -8px 22px rgba(0,0,0,0.06);
-    }
-
-    .tab-btn{
-      border:none;
-      background:#fff;
-      padding:14px 10px 18px;
-      font-size:14px;
-      font-weight:800;
-      color:var(--muted);
-      cursor:pointer;
-    }
-
-    .tab-btn.active{
-      color:#000;
-    }
-
-    .hidden{
-      display:none !important;
-    }
+    .chip.red{background:var(--red)}
 
     .top-actions{
       display:flex;
@@ -323,8 +276,13 @@
       margin-top:10px;
     }
 
-    .top-actions .btn{
-      margin:0;
+    #map{
+      height:48vh;
+      min-height:360px;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
     }
 
     .filter-row{
@@ -349,23 +307,51 @@
       color:#fff;
     }
 
-    .empty-state{
+    .empty{
       text-align:center;
       color:var(--muted);
-      padding:24px 10px;
+      padding:20px 10px;
+    }
+
+    .tabs{
+      position:fixed;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:100%;
+      max-width:580px;
+      background:#fff;
+      border-top:1px solid var(--line);
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      z-index:30;
+      box-shadow:0 -8px 22px rgba(0,0,0,0.06);
+    }
+
+    .tab-btn{
+      border:none;
+      background:#fff;
+      padding:14px 10px 18px;
+      font-size:14px;
+      font-weight:800;
+      color:var(--muted);
+    }
+
+    .tab-btn.active{
+      color:#000;
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <div class="topbar">
+  <div class="app">
+    <div class="header">
       <img src="logo.png" alt="PrimaLeads Logo">
       <div class="brand">PRIMALEADS</div>
     </div>
 
     <div class="content">
 
-      <div id="loginView" class="card login-card">
+      <div id="loginView" class="card">
         <h2 class="section-title">Login</h2>
         <input id="email" type="email" placeholder="Email">
         <input id="password" type="password" placeholder="Passwort">
@@ -376,7 +362,7 @@
 
         <div id="dashboardTab">
           <div class="card">
-            <h2 class="section-title">Rangliste</h2>
+            <h2 class="section-title">Dashboard</h2>
             <div class="muted" id="welcomeText">Willkommen</div>
             <div class="top-actions">
               <button class="btn btn-black" onclick="refreshAll()">Aktualisieren</button>
@@ -385,7 +371,7 @@
           </div>
 
           <div class="card">
-            <h3>Top 5 Vertriebspartner</h3>
+            <h3>Top 5 Rangliste</h3>
             <div id="rankingList" class="rank-list"></div>
           </div>
 
@@ -420,20 +406,24 @@
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <h3>Top Straßen</h3>
+            <div id="topStreetsList" class="street-list"></div>
+          </div>
         </div>
 
         <div id="leadsTab" class="hidden">
           <div class="card">
             <h2 class="section-title">Meine Leads</h2>
-            <p class="muted">Hier sieht jeder Vertriebspartner nur seine aufgenommenen Leads.</p>
+            <p class="muted">Jeder Vertriebspartner sieht hier nur seine aufgenommenen Leads.</p>
           </div>
-
           <div id="leadList" class="lead-list"></div>
         </div>
 
         <div id="mapTab" class="hidden">
           <div class="card">
-            <h2 class="section-title">Heatmap & Leads</h2>
+            <h2 class="section-title">Heatmap</h2>
             <div class="filter-row">
               <button id="filterWp" class="filter-btn active" onclick="setHeatFilter('WP Interesse')">WP</button>
               <button id="filterPv" class="filter-btn" onclick="setHeatFilter('PV Interesse')">PV</button>
@@ -443,6 +433,11 @@
           </div>
 
           <div id="map"></div>
+
+          <div class="card">
+            <h3>Straßenanalyse</h3>
+            <div id="streetSummary" class="muted">Klicke ein Haus auf der Karte an.</div>
+          </div>
 
           <div class="card">
             <h3>Lead aufnehmen</h3>
