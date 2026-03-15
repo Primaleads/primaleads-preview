@@ -4,19 +4,38 @@ const supabaseKey="sb_publishable_q3gMEue0WevkMEEwGzGv-w_jE9eFdNr"
 const supabaseClient=supabase.createClient(supabaseUrl,supabaseKey)
 
 let map
+let area=""
+let street=""
+let leads=[]
 let userLat
 let userLng
-let currentStreet=""
-let leads=[]
 
-async function loadStreet(){
+async function loadArea(){
 
-currentStreet=document.getElementById("streetInput").value
+area=document.getElementById("areaInput").value
 
 const {data,error}=await supabaseClient
 .from("Leads")
 .select("*")
-.eq("street",currentStreet)
+.eq("area",area)
+
+if(error){
+console.log(error)
+return
+}
+
+leads=data
+
+}
+
+async function loadStreet(){
+
+street=document.getElementById("streetInput").value
+
+const {data,error}=await supabaseClient
+.from("Leads")
+.select("*")
+.eq("street",street)
 
 if(error){
 console.log(error)
@@ -26,7 +45,6 @@ return
 leads=data
 
 updateProgress()
-
 drawStreet()
 
 }
@@ -47,12 +65,12 @@ document.getElementById("streetProgress").innerHTML=
 
 `
 Häuser besucht: ${visited}<br>
-Gesamt Leads: ${total}
+Leads: ${total}
 `
 
 }
 
-function startRoute(){
+function startMap(){
 
 if(!map){
 
@@ -121,6 +139,7 @@ const number=document.getElementById("number").value
 await supabaseClient
 .from("Leads")
 .insert([{
+area,
 street,
 number,
 status,
