@@ -1,305 +1,181 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrimaLeads</title>
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<title>PrimaLeads</title>
 
-  <style>
-    :root{
-      --bg:#f3f4f6;
-      --card:#ffffff;
-      --text:#111111;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --black:#000000;
-      --green:#2ecc71;
-      --blue:#3498db;
-      --red:#e74c3c;
-      --gray:#7f8c8d;
-      --orange:#f39c12;
-      --shadow:0 10px 28px rgba(0,0,0,0.08);
-      --radius:18px;
-    }
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-    *{box-sizing:border-box}
+<style>
 
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+body{
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
+}
 
-    .app{
-      max-width:580px;
-      margin:0 auto;
-      min-height:100vh;
-      background:var(--bg);
-    }
+.header{
+background:black;
+color:white;
+text-align:center;
+padding:15px;
+font-weight:bold;
+}
 
-    .header{
-      background:#000;
-      color:#fff;
-      text-align:center;
-      padding:18px 16px 14px;
-      position:sticky;
-      top:0;
-      z-index:30;
-      box-shadow:0 6px 18px rgba(0,0,0,0.16);
-    }
+.page{
+display:none;
+padding:15px;
+}
 
-    .header img{
-      height:42px;
-      display:block;
-      margin:0 auto 8px;
-      object-fit:contain;
-    }
+.active{
+display:block;
+}
 
-    .brand{
-      font-size:15px;
-      letter-spacing:.08em;
-      font-weight:800;
-    }
+.card{
+background:white;
+border-radius:12px;
+padding:15px;
+margin-bottom:15px;
+}
 
-    .content{
-      padding:16px;
-      padding-bottom:28px;
-    }
+#map{
+height:60vh;
+border-radius:10px;
+}
 
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-      margin-bottom:16px;
-    }
+button{
+padding:12px;
+border:none;
+border-radius:8px;
+font-weight:bold;
+color:white;
+width:100%;
+margin-bottom:10px;
+}
 
-    h1,h2,h3,p{
-      margin:0 0 10px;
-    }
+.green{background:#2ecc71}
+.blue{background:#3498db}
+.red{background:#e74c3c}
+.gray{background:#7f8c8d}
+.black{background:black}
 
-    .section-title{
-      font-size:24px;
-      font-weight:800;
-      margin-bottom:14px;
-    }
+input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
 
-    .muted{
-      color:var(--muted);
-    }
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:white;
+display:flex;
+border-top:1px solid #ddd;
+}
 
-    .stats-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+.bottom-nav button{
+flex:1;
+background:none;
+color:black;
+font-size:14px;
+}
 
-    .stat-box{
-      background:#fafafa;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-    }
+.lead-item{
+padding:10px;
+border-bottom:1px solid #eee;
+}
 
-    .stat-label{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
+</style>
 
-    .stat-value{
-      font-size:24px;
-      font-weight:800;
-    }
-
-    .quote-row{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-      margin-top:8px;
-    }
-
-    .quote-box{
-      border-radius:14px;
-      padding:14px;
-      color:#fff;
-      text-align:center;
-      font-weight:800;
-    }
-
-    .quote-box small{
-      display:block;
-      margin-bottom:6px;
-      opacity:.92;
-      font-weight:700;
-    }
-
-    .filter-row{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:8px;
-      margin-bottom:12px;
-    }
-
-    .filter-btn{
-      border:none;
-      border-radius:12px;
-      padding:12px;
-      font-size:14px;
-      font-weight:800;
-      background:#ececec;
-      color:#111;
-      cursor:pointer;
-    }
-
-    .filter-btn.active{
-      background:#000;
-      color:#fff;
-    }
-
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:16px;
-      padding:15px 16px;
-      font-size:17px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .btn-black{background:#000;color:#fff}
-    .btn-green{background:var(--green);color:#fff}
-    .btn-blue{background:var(--blue);color:#fff}
-    .btn-red{background:var(--red);color:#fff}
-    .btn-gray{background:var(--gray);color:#fff}
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    input,textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      font-size:16px;
-      margin-bottom:10px;
-      outline:none;
-      background:#fff;
-    }
-
-    textarea{
-      min-height:90px;
-      resize:vertical;
-    }
-
-    #map{
-      height:52vh;
-      min-height:380px;
-      border-radius:20px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      margin-bottom:16px;
-    }
-
-    .street-summary{
-      line-height:1.5;
-      font-size:14px;
-    }
-
-    .empty{
-      text-align:center;
-      color:var(--muted);
-      padding:16px 8px;
-    }
-  </style>
 </head>
+
+
 <body>
-  <div class="app">
-    <div class="header">
-      <img src="logo.png" alt="PrimaLeads Logo">
-      <div class="brand">PRIMALEADS</div>
-    </div>
 
-    <div class="content">
+<div class="header">
 
-      <div class="card">
-        <h2 class="section-title">Dashboard</h2>
+PRIMALEADS
 
-        <div class="stats-grid">
-          <div class="stat-box">
-            <div class="stat-label">Gesamt Leads</div>
-            <div class="stat-value" id="totalLeads">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Aktuelle Straße</div>
-            <div class="stat-value" id="currentStreetCount">0</div>
-          </div>
-        </div>
+</div>
 
-        <div class="quote-row">
-          <div class="quote-box" style="background:#2ecc71">
-            <small>Bestätigt</small>
-            <span id="confirmedCount">0</span>
-          </div>
-          <div class="quote-box" style="background:#f39c12">
-            <small>Offen</small>
-            <span id="openCount">0</span>
-          </div>
-          <div class="quote-box" style="background:#e74c3c">
-            <small>Abgelehnt</small>
-            <span id="rejectedCount">0</span>
-          </div>
-        </div>
-      </div>
 
-      <div class="card">
-        <h3>Heatmap Filter</h3>
-        <div class="filter-row">
-          <button id="filterWp" class="filter-btn active" onclick="setHeatFilter('WP Interesse')">WP</button>
-          <button id="filterPv" class="filter-btn" onclick="setHeatFilter('PV Interesse')">PV</button>
-          <button id="filterAll" class="filter-btn" onclick="setHeatFilter('all')">Alle</button>
-        </div>
-        <button class="btn btn-black" onclick="startMap()">Karte starten</button>
-      </div>
+<!-- DASHBOARD -->
 
-      <div id="map"></div>
+<div id="dashboardPage" class="page active">
 
-      <div class="card">
-        <h3>Straßenfortschritt</h3>
-        <div id="streetSummary" class="street-summary muted">Klicke ein Haus auf der Karte an.</div>
-      </div>
+<div class="card">
 
-      <div class="card">
-        <h3>Lead aufnehmen</h3>
-        <input id="street" placeholder="Straße">
-        <input id="number" placeholder="Hausnummer">
-        <input id="customer_name" placeholder="Kundenname">
-        <input id="customer_phone" placeholder="Telefon">
-        <textarea id="notes" placeholder="Notizen"></textarea>
+<h3>Rangliste</h3>
 
-        <div class="grid-2">
-          <button class="btn btn-green" onclick="saveLead('PV Interesse')">PV Interesse</button>
-          <button class="btn btn-blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
-          <button class="btn btn-red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-          <button class="btn btn-gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
-        </div>
-      </div>
+<div id="ranking"></div>
 
-    </div>
-  </div>
+</div>
 
-  <script src="index.js"></script>
+<div class="card">
+
+<h3>Qualifikationsquote</h3>
+
+Bestätigt: <span id="confirmed"></span><br>
+Offen: <span id="open"></span><br>
+Abgelehnt: <span id="rejected"></span>
+
+</div>
+
+</div>
+
+
+<!-- MAP -->
+
+<div id="mapPage" class="page">
+
+<button class="black" onclick="startMap()">Karte starten</button>
+
+<div id="map"></div>
+
+<input id="street" placeholder="Straße">
+<input id="number" placeholder="Hausnummer">
+
+<button class="green" onclick="saveLead('PV Interesse')">PV Interesse</button>
+<button class="blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
+<button class="red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+<button class="gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+
+</div>
+
+
+<!-- LEADS -->
+
+<div id="leadsPage" class="page">
+
+<input id="search" placeholder="Leads suchen..." oninput="searchLeads()">
+
+<div id="leadList"></div>
+
+</div>
+
+
+<!-- NAV -->
+
+<div class="bottom-nav">
+
+<button onclick="showPage('dashboardPage')">Dashboard</button>
+<button onclick="showPage('mapPage')">Karte</button>
+<button onclick="showPage('leadsPage')">Leads</button>
+
+</div>
+
+<script src="index.js"></script>
+
 </body>
+
 </html>
