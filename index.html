@@ -1,347 +1,201 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrimaLeads</title>
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<title>PrimaLeads</title>
 
-  <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#ffffff;
-      --text:#111111;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --green:#2ecc71;
-      --blue:#3498db;
-      --red:#e74c3c;
-      --gray:#7f8c8d;
-      --black:#000000;
-    }
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-    *{box-sizing:border-box}
+<style>
 
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+body{
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
+}
 
-    .header{
-      background:#000;
-      color:#fff;
-      text-align:center;
-      padding:16px;
-      position:sticky;
-      top:0;
-      z-index:20;
-    }
+.header{
+background:black;
+color:white;
+text-align:center;
+padding:15px;
+font-weight:bold;
+}
 
-    .header h2{
-      margin:0;
-      font-size:20px;
-      letter-spacing:.08em;
-    }
+.page{
+display:none;
+padding:15px;
+padding-bottom:90px;
+}
 
-    .page{
-      display:none;
-      padding:15px;
-      padding-bottom:95px;
-    }
+.active{
+display:block;
+}
 
-    .page.active{
-      display:block;
-    }
+.card{
+background:white;
+border-radius:12px;
+padding:15px;
+margin-bottom:15px;
+}
 
-    .card{
-      background:var(--card);
-      border-radius:12px;
-      padding:15px;
-      margin-bottom:15px;
-      box-shadow:0 8px 20px rgba(0,0,0,.06);
-    }
+input,select{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
 
-    .card h3{
-      margin-top:0;
-    }
+button{
+padding:12px;
+border:none;
+border-radius:8px;
+font-weight:bold;
+color:white;
+width:100%;
+margin-bottom:10px;
+}
 
-    .stats-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+.black{background:black}
+.green{background:#2ecc71}
+.blue{background:#3498db}
+.red{background:#e74c3c}
+.gray{background:#7f8c8d}
 
-    .stat{
-      background:#fafafa;
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:12px;
-    }
+#map{
+height:55vh;
+border-radius:10px;
+margin-bottom:10px;
+}
 
-    .stat-label{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:white;
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+border-top:1px solid #ddd;
+}
 
-    .stat-value{
-      font-size:22px;
-      font-weight:bold;
-    }
+.bottom-nav button{
+background:none;
+color:black;
+}
 
-    input, select, textarea{
-      width:100%;
-      padding:12px;
-      margin-bottom:10px;
-      border-radius:10px;
-      border:1px solid #ccc;
-      font-size:15px;
-      background:#fff;
-    }
+.lead-item{
+padding:10px;
+border-bottom:1px solid #eee;
+}
 
-    textarea{
-      min-height:90px;
-      resize:vertical;
-    }
+.badge{
+padding:5px 8px;
+border-radius:6px;
+font-size:12px;
+color:white;
+}
 
-    button{
-      width:100%;
-      padding:13px;
-      border:none;
-      border-radius:10px;
-      font-weight:bold;
-      color:#fff;
-      margin-bottom:10px;
-      font-size:15px;
-      cursor:pointer;
-    }
+</style>
 
-    .black{background:#000}
-    .green{background:var(--green)}
-    .blue{background:var(--blue)}
-    .red{background:var(--red)}
-    .gray{background:var(--gray)}
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .quote{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-    }
-
-    .quote-box{
-      border-radius:10px;
-      padding:12px;
-      color:#fff;
-      text-align:center;
-      font-weight:bold;
-    }
-
-    #map{
-      height:50vh;
-      min-height:360px;
-      border-radius:12px;
-      margin-bottom:15px;
-      overflow:hidden;
-    }
-
-    .bottom-nav{
-      position:fixed;
-      bottom:0;
-      left:0;
-      width:100%;
-      background:#fff;
-      border-top:1px solid #ddd;
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      z-index:30;
-    }
-
-    .bottom-nav button{
-      background:#fff;
-      color:#111;
-      border-radius:0;
-      margin:0;
-      padding:14px 8px 18px;
-      font-size:14px;
-    }
-
-    .lead-item, .street-item{
-      padding:12px 0;
-      border-bottom:1px solid #eee;
-    }
-
-    .lead-title, .street-title{
-      font-weight:bold;
-      margin-bottom:4px;
-    }
-
-    .muted{
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .badge{
-      display:inline-block;
-      padding:5px 9px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:bold;
-      color:#fff;
-      margin-top:6px;
-    }
-
-    .empty{
-      color:var(--muted);
-      text-align:center;
-      padding:14px 0;
-    }
-
-    .sync-info{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    .small-btn{
-      width:auto;
-      margin-right:8px;
-      margin-top:8px;
-      margin-bottom:0;
-      padding:8px 12px;
-      font-size:13px;
-      display:inline-block;
-    }
-
-    .filter-row{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:8px;
-    }
-
-    .filter-row button.active{
-      outline:2px solid #000;
-    }
-  </style>
 </head>
+
 <body>
-  <div class="header">
-    <h2>PRIMALEADS</h2>
-  </div>
 
-  <div id="dashboardPage" class="page active">
-    <div class="card">
-      <h3>Gebiet & Status</h3>
-      <select id="areaSelect" onchange="changeArea()">
-        <option value="Alle">Alle Gebiete</option>
-        <option value="Weil im Schönbuch">Weil im Schönbuch</option>
-        <option value="Holzgerlingen">Holzgerlingen</option>
-        <option value="Böblingen">Böblingen</option>
-        <option value="Sindelfingen">Sindelfingen</option>
-        <option value="Leonberg">Leonberg</option>
-      </select>
-      <div class="sync-info" id="syncInfo">Online</div>
-      <button class="black" onclick="syncOfflineLeads()">Offline Leads synchronisieren</button>
-    </div>
+<div class="header">
 
-    <div class="card">
-      <h3>Rangliste</h3>
-      <div id="ranking"></div>
-    </div>
+PRIMALEADS
 
-    <div class="card">
-      <h3>Qualifikationsquote</h3>
-      <div class="quote">
-        <div class="quote-box green">
-          Bestätigt<br><span id="confirmed">0</span>
-        </div>
-        <div class="quote-box gray">
-          Offen<br><span id="open">0</span>
-        </div>
-        <div class="quote-box red">
-          Abgelehnt<br><span id="rejected">0</span>
-        </div>
-      </div>
-    </div>
+</div>
 
-    <div class="card">
-      <h3>Gebietsfortschritt</h3>
-      <div class="stats-grid">
-        <div class="stat">
-          <div class="stat-label">Leads im Gebiet</div>
-          <div class="stat-value" id="areaLeadCount">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Straßen im Gebiet</div>
-          <div class="stat-value" id="areaStreetCount">0</div>
-        </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>Straßenfortschritt</h3>
-      <div id="streetProgressList"></div>
-    </div>
-  </div>
+<!-- LOGIN -->
 
-  <div id="mapPage" class="page">
-    <div class="card">
-      <h3>Karte & Heatmap</h3>
-      <div class="filter-row">
-        <button id="filterWp" class="black active" onclick="setHeatFilter('WP Interesse')">WP</button>
-        <button id="filterPv" class="green" onclick="setHeatFilter('PV Interesse')">PV</button>
-        <button id="filterAll" class="gray" onclick="setHeatFilter('all')">Alle</button>
-      </div>
-      <button class="black" onclick="startMap()">Karte starten</button>
-    </div>
+<div id="loginPage" class="page active">
 
-    <div id="map"></div>
+<div class="card">
 
-    <div class="card">
-      <h3>Straße / Haus automatisch erkennen</h3>
-      <input id="street" placeholder="Straße">
-      <input id="number" placeholder="Hausnummer">
-      <input id="customer_name" placeholder="Kundenname">
-      <input id="customer_phone" placeholder="Telefonnummer">
-      <textarea id="notes" placeholder="Notizen"></textarea>
+<h3>Login</h3>
 
-      <div class="grid-2">
-        <button class="green" onclick="saveLead('PV Interesse')">PV Interesse</button>
-        <button class="blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
-        <button class="red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-        <button class="gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
-      </div>
-    </div>
-  </div>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Passwort">
 
-  <div id="leadsPage" class="page">
-    <div class="card">
-      <h3>Leads</h3>
-      <input id="search" placeholder="Straße oder Hausnummer suchen..." oninput="searchLeads()">
-      <div id="leadList"></div>
-    </div>
-  </div>
+<button class="black" onclick="login()">Login</button>
 
-  <div class="bottom-nav">
-    <button onclick="showPage('dashboardPage')">Dashboard</button>
-    <button onclick="showPage('mapPage')">Karte</button>
-    <button onclick="showPage('leadsPage')">Leads</button>
-  </div>
+</div>
 
-  <script src="index.js"></script>
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboardPage" class="page">
+
+<div class="card">
+
+<h3>Rangliste</h3>
+
+<div id="ranking"></div>
+
+</div>
+
+<div class="card">
+
+<h3>Meine Leads</h3>
+
+<span id="myLeads"></span>
+
+</div>
+
+</div>
+
+
+<!-- MAP -->
+
+<div id="mapPage" class="page">
+
+<button class="black" onclick="startMap()">Karte starten</button>
+
+<div id="map"></div>
+
+<input id="street" placeholder="Straße">
+<input id="number" placeholder="Hausnummer">
+
+<button class="green" onclick="saveLead('PV Interesse')">PV Interesse</button>
+<button class="blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
+<button class="red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+<button class="gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+
+</div>
+
+
+<!-- LEADS -->
+
+<div id="leadsPage" class="page">
+
+<input id="search" placeholder="Leads suchen..." oninput="searchLeads()">
+
+<div id="leadList"></div>
+
+</div>
+
+
+<!-- NAV -->
+
+<div class="bottom-nav">
+
+<button onclick="showPage('dashboardPage')">Dashboard</button>
+<button onclick="showPage('mapPage')">Karte</button>
+<button onclick="showPage('leadsPage')">Leads</button>
+
+</div>
+
+<script src="index.js"></script>
+
 </body>
 </html>
