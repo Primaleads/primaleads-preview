@@ -4,16 +4,20 @@ const supabaseKey="sb_publishable_q3gMEue0WevkMEEwGzGv-w_jE9eFdNr"
 const supabaseClient=supabase.createClient(supabaseUrl,supabaseKey)
 
 let map
+let area=""
+let street=""
 let leads=[]
-let routeLine
 let userLat
 let userLng
 
-async function loadLeads(){
+async function loadArea(){
+
+area=document.getElementById("areaInput").value
 
 const {data,error}=await supabaseClient
 .from("Leads")
 .select("*")
+.eq("area",area)
 
 if(error){
 console.log(error)
@@ -22,77 +26,51 @@ return
 
 leads=data
 
-renderDashboard()
-renderLeads()
-drawMap()
+}
+
+async function loadStreet(){
+
+street=document.getElementById("streetInput").value
+
+const {data,error}=await supabaseClient
+.from("Leads")
+.select("*")
+.eq("street",street)
+
+if(error){
+console.log(error)
+return
+}
+
+leads=data
+
+updateProgress()
+drawStreet()
 
 }
 
-function showTab(tab){
+function updateProgress(){
 
-document.getElementById("dashboard").style.display="none"
-document.getElementById("leads").style.display="none"
-document.getElementById("mapView").style.display="none"
+const total=leads.length
 
-document.getElementById(tab).style.display="block"
-
-}
-
-function renderDashboard(){
-
-let rankingMap={}
+let visited=0
 
 leads.forEach(l=>{
 
-if(!rankingMap[l.setter_email]) rankingMap[l.setter_email]=0
-
-rankingMap[l.setter_email]++
+if(l.status) visited++
 
 })
 
-let rankingArray=Object.entries(rankingMap)
-.sort((a,b)=>b[1]-a[1])
-.slice(0,5)
-
-const ranking=document.getElementById("ranking")
-
-ranking.innerHTML=""
-
-rankingArray.forEach(r=>{
-
-ranking.innerHTML+=`${r[0]} : ${r[1]} Leads<br>`
-
-})
-
-}
-
-function renderLeads(){
-
-const list=document.getElementById("leadList")
-
-list.innerHTML=""
-
-leads.forEach(l=>{
-
-list.innerHTML+=`
-
-<div class="card">
-
-<b>${l.street} ${l.number}</b><br>
-
-Status: ${l.status}<br>
-
-Qualifikation: ${l.qualification || "offen"}
-
-</div>
+document.getElementById("streetProgress").innerHTML=
 
 `
-
-})
+Häuser besucht: ${visited}<br>
+Leads: ${total}
+`
 
 }
 
-function startRoute(){
+function startMap(){
 
 if(!map){
 
@@ -126,11 +104,11 @@ map.setView([userLat,userLng],18)
 
 })
 
-drawMap()
+drawStreet()
 
 }
 
-function drawMap(){
+function drawStreet(){
 
 if(!map) return
 
@@ -145,10 +123,9 @@ if(l.status==="WP Interesse") color="blue"
 if(l.status==="Kein Interesse") color="red"
 
 L.circleMarker([l.lat,l.lng],{
-radius:8,
+radius:7,
 color:color
-})
-.addTo(map)
+}).addTo(map)
 
 })
 
@@ -162,6 +139,7 @@ const number=document.getElementById("number").value
 await supabaseClient
 .from("Leads")
 .insert([{
+area,
 street,
 number,
 status,
@@ -169,10 +147,8 @@ lat:userLat,
 lng:userLng
 }])
 
-loadLeads()
+loadStreet()
 
 alert("Lead gespeichert")
 
 }
-
-loadLeads()
