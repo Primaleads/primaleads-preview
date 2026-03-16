@@ -1,242 +1,331 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrimaLeads</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
 
-<title>PrimaLeads</title>
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-<link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-<link rel="apple-touch-icon" href="app-icon.png">
-<link rel="icon" href="app-icon.png">
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#111111;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --green:#2ecc71;
+      --blue:#3498db;
+      --red:#e74c3c;
+      --gray:#7f8c8d;
+      --black:#000000;
+      --shadow:0 10px 24px rgba(0,0,0,.08);
+    }
 
-<meta name="theme-color" content="#000000">
+    *{
+      box-sizing:border-box;
+    }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    .header{
+      background:#000;
+      color:#fff;
+      text-align:center;
+      padding:16px;
+      font-weight:bold;
+      position:sticky;
+      top:0;
+      z-index:20;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    .header img{
+      height:42px;
+      display:block;
+      margin:0 auto;
+      object-fit:contain;
+    }
 
-<style>
+    .page{
+      display:none;
+      padding:15px;
+      padding-bottom:95px;
+    }
 
-body{
-margin:0;
-font-family:Arial;
-background:#f4f4f4;
-}
+    .page.active{
+      display:block;
+    }
 
-.header{
-background:#000;
-padding:15px;
-text-align:center;
-}
+    .card{
+      background:#fff;
+      border-radius:14px;
+      padding:15px;
+      margin-bottom:15px;
+      box-shadow:var(--shadow);
+    }
 
-.logo{
-height:40px;
-}
+    h3{
+      margin-top:0;
+    }
 
-.page{
-display:none;
-padding:15px;
-padding-bottom:90px;
-}
+    input,select,textarea{
+      width:100%;
+      padding:12px;
+      margin-bottom:10px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:15px;
+      background:#fff;
+    }
 
-.active{
-display:block;
-}
+    textarea{
+      min-height:90px;
+      resize:vertical;
+    }
 
-.card{
-background:white;
-border-radius:12px;
-padding:15px;
-margin-bottom:15px;
-box-shadow:0 4px 15px rgba(0,0,0,0.1);
-}
+    button{
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      font-weight:bold;
+      color:#fff;
+      width:100%;
+      margin-bottom:10px;
+      font-size:15px;
+      cursor:pointer;
+    }
 
-input,textarea{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border-radius:8px;
-border:1px solid #ccc;
-}
+    .black{background:#000;}
+    .green{background:#2ecc71;}
+    .blue{background:#3498db;}
+    .red{background:#e74c3c;}
+    .gray{background:#7f8c8d;}
 
-textarea{
-min-height:80px;
-}
+    .stats-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
 
-button{
-padding:12px;
-border:none;
-border-radius:8px;
-font-weight:bold;
-color:white;
-width:100%;
-margin-bottom:10px;
-}
+    .stat{
+      background:#fafafa;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+    }
 
-.black{background:black}
-.green{background:#2ecc71}
-.blue{background:#3498db}
-.red{background:#e74c3c}
-.gray{background:#7f8c8d}
+    .stat-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
 
-.stats{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
+    .stat-value{
+      font-size:22px;
+      font-weight:bold;
+    }
 
-.stat{
-background:#fafafa;
-border-radius:8px;
-padding:10px;
-text-align:center;
-}
+    .bottom-nav{
+      position:fixed;
+      bottom:0;
+      width:100%;
+      background:#fff;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      border-top:1px solid #ddd;
+      z-index:30;
+    }
 
-.bottom-nav{
-position:fixed;
-bottom:0;
-width:100%;
-background:white;
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-border-top:1px solid #ddd;
-}
+    .bottom-nav button{
+      background:none;
+      color:#111;
+      margin:0;
+      border-radius:0;
+      padding:14px 8px 18px;
+    }
 
-.bottom-nav button{
-background:none;
-color:black;
-padding:15px;
-}
+    #map{
+      height:52vh;
+      border-radius:12px;
+      overflow:hidden;
+      margin-bottom:10px;
+    }
 
-#map{
-height:50vh;
-border-radius:10px;
-margin-bottom:10px;
-}
+    .lead-item,
+    .street-item{
+      padding:12px 0;
+      border-bottom:1px solid #eee;
+    }
 
-</style>
+    .title{
+      font-weight:bold;
+      margin-bottom:4px;
+    }
 
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:5px 8px;
+      border-radius:6px;
+      font-size:12px;
+      color:#fff;
+      margin-top:6px;
+    }
+
+    .quote{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+
+    .quote-box{
+      border-radius:12px;
+      padding:12px;
+      color:#fff;
+      text-align:center;
+      font-weight:bold;
+    }
+
+    .filter-row{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+    }
+
+    .filter-row button.active{
+      outline:2px solid #000;
+    }
+
+    .empty{
+      color:var(--muted);
+      text-align:center;
+      padding:14px 0;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="header">
+  <div class="header">
+    <img src="logo.png" alt="PrimaLeads Logo">
+  </div>
 
-<img src="logo.png" class="logo">
+  <div id="loginPage" class="page active">
+    <div class="card">
+      <h3>Login</h3>
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Passwort">
+      <button class="black" onclick="login()">Login</button>
+    </div>
+  </div>
 
-</div>
+  <div id="dashboardPage" class="page">
+    <div class="card">
+      <h3>Live Team Dashboard</h3>
+      <div class="muted" id="currentSetter"></div>
+      <button class="black" onclick="loadAll()">Aktualisieren</button>
+    </div>
 
+    <div class="card">
+      <h3>Meine Zahlen</h3>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Meine Leads</div>
+          <div id="myLeadCount" class="stat-value">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Mein Gebiet</div>
+          <div id="myArea" class="stat-value">-</div>
+        </div>
+      </div>
+    </div>
 
-<div id="loginPage" class="page active">
+    <div class="card">
+      <h3>Qualifikationsquote</h3>
+      <div class="quote">
+        <div class="quote-box green">Bestätigt<br><span id="confirmed">0</span></div>
+        <div class="quote-box gray">Offen<br><span id="open">0</span></div>
+        <div class="quote-box red">Abgelehnt<br><span id="rejected">0</span></div>
+      </div>
+    </div>
 
-<div class="card">
+    <div class="card">
+      <h3>Top Setter</h3>
+      <div id="ranking"></div>
+    </div>
 
-<h3>Login</h3>
+    <div class="card">
+      <h3>Gebietsübersicht</h3>
+      <div id="areaList"></div>
+    </div>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Passwort">
+    <div class="card">
+      <h3>Offene Straßen</h3>
+      <div id="openStreetList"></div>
+    </div>
+  </div>
 
-<button class="black" onclick="login()">Login</button>
+  <div id="mapPage" class="page">
+    <div class="card">
+      <h3>Karte & Heatmap</h3>
+      <div class="filter-row">
+        <button id="filterWp" class="black active" onclick="setHeatFilter('WP Interesse')">WP</button>
+        <button id="filterPv" class="green" onclick="setHeatFilter('PV Interesse')">PV</button>
+        <button id="filterAll" class="gray" onclick="setHeatFilter('all')">Alle</button>
+      </div>
+      <button class="black" onclick="startMap()">Karte starten</button>
+    </div>
 
-</div>
+    <div id="map"></div>
 
-</div>
+    <div class="card">
+      <h3>Lead aufnehmen</h3>
+      <input id="street" placeholder="Straße">
+      <input id="number" placeholder="Hausnummer">
+      <input id="customer_name" placeholder="Kundenname">
+      <input id="customer_phone" placeholder="Telefonnummer">
+      <textarea id="notes" placeholder="Notizen"></textarea>
 
+      <button class="green" onclick="saveLead('PV Interesse')">PV Interesse</button>
+      <button class="blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
+      <button class="red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
+      <button class="gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
+    </div>
+  </div>
 
+  <div id="leadsPage" class="page">
+    <div class="card">
+      <h3>Leads</h3>
+      <input id="search" placeholder="Straße / Hausnummer suchen..." oninput="searchLeads()">
+      <div id="leadList"></div>
+    </div>
+  </div>
 
-<div id="dashboardPage" class="page">
+  <div class="bottom-nav">
+    <button onclick="showPage('dashboardPage')">Dashboard</button>
+    <button onclick="showPage('mapPage')">Karte</button>
+    <button onclick="showPage('leadsPage')">Leads</button>
+  </div>
 
-<div class="card">
-
-<h3>Meine Statistik</h3>
-
-<div class="stats">
-
-<div class="stat">
-Meine Leads
-<div id="myLeadCount">0</div>
-</div>
-
-<div class="stat">
-Mein Gebiet
-<div id="myArea">-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<div id="mapPage" class="page">
-
-<div class="card">
-
-<button class="black" onclick="startMap()">Karte starten</button>
-
-</div>
-
-<div id="map"></div>
-
-<div class="card">
-
-<h3>Lead aufnehmen</h3>
-
-<input id="street" placeholder="Straße">
-<input id="number" placeholder="Hausnummer">
-
-<input id="customer_name" placeholder="Kundenname">
-<input id="customer_phone" placeholder="Telefon">
-
-<textarea id="notes" placeholder="Notizen"></textarea>
-
-<button class="green" onclick="saveLead('PV Interesse')">PV Interesse</button>
-<button class="blue" onclick="saveLead('WP Interesse')">WP Interesse</button>
-<button class="red" onclick="saveLead('Kein Interesse')">Kein Interesse</button>
-<button class="gray" onclick="saveLead('Niemand zuhause')">Niemand zuhause</button>
-
-</div>
-
-</div>
-
-
-
-<div id="leadsPage" class="page">
-
-<div class="card">
-
-<h3>Leads</h3>
-
-<input id="search" placeholder="Straße suchen..." oninput="searchLeads()">
-
-<div id="leadList"></div>
-
-</div>
-
-</div>
-
-
-
-<div class="bottom-nav">
-
-<button onclick="showPage('dashboardPage')">Dashboard</button>
-<button onclick="showPage('mapPage')">Karte</button>
-<button onclick="showPage('leadsPage')">Leads</button>
-
-</div>
-
-
-<script src="index.js"></script>
-
+  <script src="index.js"></script>
 </body>
-
 </html>
