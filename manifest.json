@@ -1,10 +1,12 @@
 {
   "name": "PrimaLeads",
   "short_name": "PrimaLeads",
+  "description": "PrimaLeads Door to Door Lead Management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon.png",
